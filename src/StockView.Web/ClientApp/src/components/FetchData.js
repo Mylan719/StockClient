@@ -1,0 +1,166 @@
+import React, { Component } from 'react';
+import Numeral from 'numeral';
+import 'numeral/locales/cs';
+import {
+    XYPlot,
+    XAxis,
+    YAxis,
+    VerticalGridLines,
+    HorizontalGridLines,
+    VerticalBarSeries,
+    VerticalBarSeriesCanvas,
+    LabelSeries,
+    RadialChart,
+    FlexibleWidthXYPlot
+} from 'react-vis';
+
+
+export class FetchData extends Component {
+    displayName = FetchData.name
+
+    constructor(props) {
+        super(props);
+        this.state = { investmentStatistics: [], loading: true };
+
+        var formData = FetchData.toFormData(
+            {
+                login: '',
+                password: ''
+            });
+
+        fetch('api/dashboard/stats', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                this.setState({ investmentStatistics: data, loading: false });
+            });
+    }
+
+    static toFormData(object) {
+        var formBody = [];
+        for (var property in object) {
+            var encodedKey = encodeURIComponent(property);
+            var encodedValue = encodeURIComponent(object[property]);
+            formBody.push(encodedKey + "=" + encodedValue);
+        }
+        return formBody.join("&");
+    }
+
+
+    static renderForecastsTable(portfolio) {
+
+        var investmentStatistic = portfolio.statistic;
+        var total = portfolio.total;
+        var symbolRatios = portfolio.balance.symbols.map(s => {
+            return {
+                name: s.name,
+                angle: s.percentage,
+                color: s.riskColor
+            };
+        });
+        
+
+        const graphInvestedData = investmentStatistic.symbols.map(s => {
+            return {
+                x: s.name,
+                y: s.investedNow
+            };
+        });
+
+        const graphInvestedPriceData = investmentStatistic.symbols.map(s => {
+            return {
+                x: s.name,
+                y: s.investedNowPrice
+            };
+        });
+
+        const labelData = graphInvestedData.map((d, idx) => ({
+            x: d.x,
+            y: Math.max(graphInvestedData[idx].y, graphInvestedPriceData[idx].y)
+        }));
+
+        return (
+            <div>
+                <table className='table'>
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Invested</th>
+                            <th>Investment price now</th>
+                            <th>Realized gain</th>
+                            <th>Gain</th>
+                            <th>Gain %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {investmentStatistic.symbols.map(symbol => {
+                            var gainsCss = symbol.gain < 0
+                                ? 'fin-bad'
+                                : 'fin-good';
+
+                            Numeral.locale('cs');
+
+
+                            return (<tr key={symbol.name}>
+                                <td>{symbol.name}</td>
+                                <td>{symbol.investedNow}</td>
+                                <td>{symbol.investedNowPrice}</td>
+                                <td>{symbol.realizedGains}</td>
+                                <td className={gainsCss}>{Numeral(symbol.gain).format("0,0.00")}</td>
+                                <td className={gainsCss}>{Numeral(symbol.gainPercentage).format("0,0.00")}%</td>
+                            </tr>);
+                        })}
+                        <tr>
+                            <td>Total:</td>
+                            <td>{total.allTimeInvested}</td>
+                            <td>{total.allTimeInvestmentValue}</td>
+                            <td />
+                            <td>{Numeral(total.gain).format("0,0.00")}</td>
+                            <td>{Numeral(total.gainPercentage).format("0,0.00")}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <XYPlot xType="ordinal" width={600} height={400} xDistance={100}>
+                    <VerticalGridLines />
+                    <HorizontalGridLines />
+                    <XAxis />
+                    <YAxis />
+                    <VerticalBarSeries data={graphInvestedData} />
+                    <VerticalBarSeries data={graphInvestedPriceData} />
+                    <LabelSeries data={labelData} getLabel={d => d.x} />
+                </XYPlot>
+                <RadialChart
+                    colorType={'literal'}
+                    colorDomain={[0, 100]}
+                    colorRange={[0, 10]}
+                    margin={{ top: 100 }}
+                    getLabel={d => d.name}
+                    data={symbolRatios}
+                    labelsRadiusMultiplier={1.1}
+                    labelsStyle={{ fontSize: 16, fill: '#222' }}
+                    showLabels
+                    style={{ stroke: '#fff', strokeWidth: 2 }}
+                    width={400}
+                    height={300}
+                />
+            </div>
+        );
+    }
+
+    render() {
+        let contents = this.state.loading
+            ? <p><em>Loading...</em></p>
+            : this.state.investmentStatistics.map(cs => FetchData.renderForecastsTable(cs));
+
+        return (
+            <div>
+                <h1>Weather forecast</h1>
+                <p>This component demonstrates fetching data from the server.</p>
+                {contents}
+            </div>
+        );
+    }
+}

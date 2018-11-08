@@ -26,8 +26,18 @@ namespace StockViewer.Fio.Trading
 
         private IList<ITradingItem> ProcessTradeData(List<TradeDataRow> tradeData)
         {
+            var dividends = tradeData
+                .Where(td => td.Price.HasValue && td.Amount.HasValue && string.IsNullOrWhiteSpace(td.Type))
+                .Select(td => new Dividend {
+                    Date = td.Date,
+                    Currency = td.Currency,
+                    Paied = td.Amount.Value,
+                    Symbol = td.Symbol,
+                    TransactionType = GetDividendTransactionType(td)
+                });
+
             var trades = tradeData
-                .Where(td => td.Price.HasValue && td.Amount.HasValue)
+                .Where(td => td.Price.HasValue && td.Amount.HasValue && !string.IsNullOrWhiteSpace(td.Type))
                 .Select(td => new Trade
                 {
                     Date = td.Date,
@@ -66,7 +76,30 @@ namespace StockViewer.Fio.Trading
                 .OfType<ITradingItem>()
                 .Concat(transfers)
                 .Concat(fees)
+                .Concat(dividends)
                 .ToList();
+        }
+
+        private DividentTransactionType GetDividendTransactionType(TradeDataRow td)
+        {
+            if (string.IsNullOrWhiteSpace(td.Type))
+            {
+                var parts = td.Description.Split(" ");
+
+                if (parts[0] != td.Symbol || parts[1] != "-")
+                {
+                    throw new InvalidOperationException("Unexpocted dividend description");
+                }
+                if (parts[2] == "Daň")
+                {
+                    return DividentTransactionType.Tax;
+                }
+                if (parts[2] == "Dividenda")
+                {
+                    return DividentTransactionType.Payment;
+                }
+            }
+            throw new InvalidOperationException("Unexpocted dividend description");
         }
 
         private static TradeType GetTradeType(TradeDataRow td)

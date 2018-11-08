@@ -60,9 +60,9 @@ namespace StockViewer
                         var balance = tradingStatisticsProvider.ComputeInvestmentBalance(sheet);
 
                         Console.WriteLine("Balance:");
-                        foreach (var symbolPercentage in balance.SymbolPercentages.OrderByDescending(s=> s.Value))
+                        foreach (var symbolPercentage in balance.Symbols.OrderByDescending(s=> s.Percentage))
                         {
-                            Console.WriteLine($"{symbolPercentage.Key}: {symbolPercentage.Value:N2}%");
+                            Console.WriteLine($"{symbolPercentage.Name}: {symbolPercentage:N2}%");
                         }
                         Console.WriteLine();
                         Console.WriteLine();

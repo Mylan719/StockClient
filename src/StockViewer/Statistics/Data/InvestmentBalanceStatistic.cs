@@ -4,7 +4,7 @@ namespace StockViewer.Statistics.Data
 {
     public class InvestmentBalanceStatistic
     {
-        public decimal TotalInvestment { get; internal set; }
-        public Dictionary<string, decimal> SymbolPercentages { get; internal set; }
+        public decimal TotalInvestment { get; set; }
+        public IList<SymbolBalance> Symbols { get; set; }
     }
 }

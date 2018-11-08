@@ -16,6 +16,11 @@ namespace StockViewer.Statistics
             var stockTrades = tradingItems.OfType<Trade>()
                                     .Where(t => t.IsShareTrade);
 
+            var stockDividendGains = tradingItems
+                .OfType<Dividend>()
+                .GroupBy(t => t.Symbol, (symbol, symbolDivs) => (symbol, symbolDivs.Sum(sd => sd.Paied)))
+                .ToDictionary(k=> k.symbol, v=> v.Item2);
+
             var symbolPrices = portfolioData
                 .ToDictionary(
                     k => k.Symbol,
@@ -35,11 +40,11 @@ namespace StockViewer.Statistics
                .ToDictionary(k => k.c, v => v.Item2);
 
             var currencyBalanceSheets = stockTrades
-                .GroupBy(t => (t.Symbol, t.Currency), (cs, ts) => ComputeSymbolBalance(cs, ts, symbolPrices[cs.Symbol]))
+                .GroupBy(t => (t.Symbol, t.Currency), (cs, ts) => ComputeSymbolBalance(cs, ts, symbolPrices[cs.Symbol], stockDividendGains.GetValueOrDefault(cs.Symbol)))
                 .GroupBy(sb => sb.Currency, (c, symbols) => new CurrencyInvestmentStatistic
                 {
                     Currency = c,
-                    Symbols = symbols.ToList(),
+                    Symbols = symbols.OrderByDescending(s => s.InvestedNow).ToList(),
                     Fees = feesPerCurrency[c],
                 })
                 .ToList();
@@ -58,10 +63,20 @@ namespace StockViewer.Statistics
         public InvestmentBalanceStatistic ComputeInvestmentBalance(CurrencyInvestmentStatistic statistic)
         {
             var total = statistic.Symbols.Sum(s => s.InvestedNow);
+            var symbolRisks = GetRiskForSymbols();
+            var riskColors = GetRiskColors();
 
             return new InvestmentBalanceStatistic
             {
-                SymbolPercentages = statistic.Symbols.ToDictionary(k=> k.Name, v=> v.InvestedNow / total*100),
+                Symbols = statistic.Symbols.Select(s => new SymbolBalance
+                {
+                    Name = s.Name,
+                    Percentage = s.InvestedNow / total * 100,
+                    Risk = symbolRisks[s.Name],
+                    RiskColor = riskColors[symbolRisks[s.Name]]
+                })
+                .OrderBy(s=> s.Risk)
+                .ToList(),
                 TotalInvestment = total
             };
         }
@@ -69,7 +84,8 @@ namespace StockViewer.Statistics
         private SymbolInvestmentStatistic ComputeSymbolBalance(
             (string Symbol, string Currency) currencySymbol,
             IEnumerable<Trade> symbolTrades,
-            PortfolioSymbolStatistic portfolioSymbolStats)
+            PortfolioSymbolStatistic portfolioSymbolStats,
+            decimal dividendGains)
         {
             var symbolsIn = symbolTrades.OrderBy(s => s.Date).Where(t => t.IsAcquire).ToList();
             var symbolsOut = symbolTrades.OrderBy(s => s.Date).Where(t => t.IsDispose).ToList();
@@ -108,14 +124,44 @@ namespace StockViewer.Statistics
                 throw new InvalidOperationException("Net amount of shares computed from trades does not match amount in portfolio. This is a api error.");
             }
 
+
+
             return new SymbolInvestmentStatistic
             {
                 Name = currencySymbol.Symbol,
                 Currency = currencySymbol.Currency,
-                RealizedGains = netSellGains,
+                RealizedGains = netSellGains + dividendGains,
                 InvestedNow = netInvested,
                 InvestedNowPrice = netAmount * portfolioSymbolStats.Price,
                 InvestedAllTime = symbolsIn.Sum(s => s.UnitPrice * s.Amount)
+            };
+        }
+
+        public IDictionary<string, Risk> GetRiskForSymbols()
+        {
+            return new Dictionary<string, Risk> {
+                { "GOOGL", Risk.Low},
+                { "TSLA", Risk.Moderate },
+                { "MSFT", Risk.Low },
+                { "IRDM", Risk.High },
+                { "FUV", Risk.High },
+                { "DBX", Risk.Moderate },
+                { "CSCO", Risk.Low },
+                { "BFAHDIVI", Risk.Dead },
+                { "BFAAGFIE", Risk.Dead },
+                { "BAATELEC", Risk.Low },
+                { "BAACHIRP", Risk.Dead },
+                { "BAACEZ", Risk.Low }
+            };
+        }
+
+        public IDictionary<Risk, string> GetRiskColors()
+        {
+            return new Dictionary<Risk, string> {
+                { Risk.High, "#f00"},
+                { Risk.Moderate, "#fa0" },
+                { Risk.Low, "#2f0" },
+                { Risk.Dead, "#000"}
             };
         }
     }

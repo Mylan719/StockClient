@@ -10,14 +10,19 @@ namespace StockViewer.Statistics.Data
         public string Currency { get; set; }
         public decimal InvestedNowPrice { get; set; }
         public decimal InvestedNow { get; set; }
-        public decimal Gain => InvestedNowPrice - InvestedNow + RealizedGains;
-        public decimal GainPercentage => InvestedAllTime == decimal.Zero
+        public decimal TotalGain => MarketGain + RealizedGains;
+        public decimal MarketGain => InvestedNowPrice - InvestedNow;
+        public decimal TotalGainPercentage => InvestedAllTime == decimal.Zero
             ? decimal.Zero
-            : Gain / InvestedAllTime * 100;
+            : TotalGain / InvestedAllTime * 100;
+
+        public decimal MarketGainPercentage => InvestedAllTime == decimal.Zero
+            ? decimal.Zero
+            : MarketGain / InvestedAllTime * 100;
 
         public decimal RealizedGains { get; internal set; }
         public decimal InvestedAllTime { get; internal set; }
 
-        public override string ToString() => $"{Name} ({Currency}): {InvestedNowPrice:N2} Gain: {Gain:N2} = {GainPercentage:N2}%";
+        public override string ToString() => $"{Name} ({Currency}): {InvestedNowPrice:N2} Gain: {TotalGain:N2} = {GainPercentage:N2}%";
     }
 }
