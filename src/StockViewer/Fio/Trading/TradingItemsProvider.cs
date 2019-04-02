@@ -112,7 +112,7 @@ namespace StockViewer.Fio.Trading
                 }
                 return TradeType.Buy;
             }
-            if (td.Type == "Predaj")
+            if (td.Type == "Prodej")
             {
                 if (td.Description.StartsWith("NEPÁROVANÝ PŘEVOD"))
                 {

@@ -40,7 +40,19 @@ namespace StockViewer.Statistics
                .ToDictionary(k => k.c, v => v.Item2);
 
             var currencyBalanceSheets = stockTrades
-                .GroupBy(t => (t.Symbol, t.Currency), (cs, ts) => ComputeSymbolBalance(cs, ts, symbolPrices[cs.Symbol], stockDividendGains.GetValueOrDefault(cs.Symbol)))
+                .GroupBy(
+                    t => (t.Symbol, t.Currency),
+                    (cs, ts) => ComputeSymbolBalance(
+                        cs, 
+                        ts, 
+                        symbolPrices.GetValueOrDefault(cs.Symbol) 
+                            ?? new PortfolioSymbolStatistic
+                            {
+                                Name = cs.Symbol,
+                                Amount = 0,
+                                Price = 0
+                            },
+                        stockDividendGains.GetValueOrDefault(cs.Symbol)))
                 .GroupBy(sb => sb.Currency, (c, symbols) => new CurrencyInvestmentStatistic
                 {
                     Currency = c,
@@ -56,7 +68,7 @@ namespace StockViewer.Statistics
             return new TotalInvestmentStatistic
             {
                 AllTimeInvestmentValue = statistic.Symbols.Sum(sb => sb.InvestedNowPrice) + statistic.Symbols.Sum(s => s.RealizedGains),
-                AllTimeInvested = statistic.Symbols.Sum(sb => sb.InvestedAllTime) + statistic.Fees
+                AllTimeInvested = statistic.Symbols.Sum(sb => sb.InvestedNow) + statistic.Fees
             };
         }
 
@@ -104,7 +116,7 @@ namespace StockViewer.Statistics
                         ? nextBuy.Amount
                         : unsatisfiedAmount;
 
-                    netSellGains += amountSatisfied * nextBuy.UnitPrice;
+                    netSellGains += amountSatisfied * (sell.UnitPrice-nextBuy.UnitPrice);
 
                     unsatisfiedAmount -= amountSatisfied;
 
@@ -133,7 +145,10 @@ namespace StockViewer.Statistics
                 RealizedGains = netSellGains + dividendGains,
                 InvestedNow = netInvested,
                 InvestedNowPrice = netAmount * portfolioSymbolStats.Price,
-                InvestedAllTime = symbolsIn.Sum(s => s.UnitPrice * s.Amount)
+                InvestedAllTime = symbolsIn.Sum(s => s.UnitPrice * s.Amount),
+                BasePrice = netAmount != decimal.Zero
+                    ? netInvested / netAmount
+                    : decimal.Zero
             };
         }
 

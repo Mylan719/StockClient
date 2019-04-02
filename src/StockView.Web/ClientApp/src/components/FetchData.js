@@ -90,6 +90,7 @@ export class FetchData extends Component {
                             <th>Symbol</th>
                             <th>Invested</th>
                             <th>Investment price now</th>
+                            <th>Base price</th>
                             <th>Realized gain</th>
                             <th>Gain</th>
                             <th>Gain %</th>
@@ -108,6 +109,7 @@ export class FetchData extends Component {
                                 <td>{symbol.name}</td>
                                 <td>{symbol.investedNow}</td>
                                 <td>{symbol.investedNowPrice}</td>
+                                <td>{Numeral(symbol.basePrice).format("0,0.00")}</td>
                                 <td>{symbol.realizedGains}</td>
                                 <td className={gainsCss}>{Numeral(symbol.gain).format("0,0.00")}</td>
                                 <td className={gainsCss}>{Numeral(symbol.gainPercentage).format("0,0.00")}%</td>
