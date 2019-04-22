@@ -5,10 +5,10 @@
     }
 }
 
-td.fin-good {
+td.fin-good, th.fin-good {
     color: forestgreen;
 }
 
-td.fin-bad {
+td.fin-bad, th.fin-bad {
     color: orangered;
 }

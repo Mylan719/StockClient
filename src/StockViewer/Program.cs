@@ -44,7 +44,7 @@ namespace StockViewer
                     tradingItems.ToList().ForEach(Console.WriteLine);
                     Console.WriteLine();
 
-                    var currencyBalanceSheets = tradingStatisticsProvider.GetInvestmentsByCurrency(portfolioData, tradingItems);
+                    var currencyBalanceSheets = tradingStatisticsProvider.GetInvestmentsByCurrency(portfolioData, tradingItems, new List<MonetaryDataRow>());
 
 
                     foreach (var sheet in currencyBalanceSheets)

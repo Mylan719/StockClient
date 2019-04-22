@@ -57,6 +57,7 @@ namespace StockViewer.Fio
             .ToList();
         }
 
+
         public async Task<List<PortfolioDataRow>> GetPortfolioDataAsync()
         {
             var response = await httpClient.GetAsync("https://www.fio.sk/e-broker/e-portfolio.cgi?menu=0");
@@ -87,6 +88,31 @@ namespace StockViewer.Fio
                 })
             .ToList();
             return portfolioData;
+        }
+
+        public async Task<List<MonetaryDataRow>> GetMonetaryDataAsync()
+        {
+            var response = await httpClient.GetAsync("https://www.fio.sk/e-broker/e-penize.cgi");
+            var document = await GetHtmlDocumentAsync(response);
+
+            var moneyTable = document.DocumentNode.QuerySelector("table#penize_table")
+                ?? throw new InvalidOperationException("Could not find expected data table in the html document. Are you logged in?");
+
+            var moneyMatrix = CreateMatrixFromHtmlTable(moneyTable);
+
+            return moneyMatrix
+            .Skip(2) //skip header and footer
+            .Select(r => new MonetaryDataRow
+            {
+                Currency = r[2],
+                Total = ToDecimal(r[3]),
+                InTransfer = ToDecimal(r[4]),
+                InBuys = ToDecimal(r[5]),
+                InSales = ToDecimal(r[6]),
+                BuyingPower = ToDecimal(r[7]) ?? (decimal)0.0,
+                ToWithdraw = ToDecimal(r[8]) ?? (decimal)0.0,
+            })
+            .ToList();
         }
 
         private async Task<Dictionary<string, string>> GetLoginFormDataAsync()

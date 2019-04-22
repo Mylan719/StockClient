@@ -11,7 +11,7 @@ namespace StockViewer.Statistics
 {
     public class TradingStatisticsProvider
     {
-        public List<CurrencyInvestmentStatistic> GetInvestmentsByCurrency(List<PortfolioDataRow> portfolioData, IList<ITradingItem> tradingItems)
+        public List<CurrencyInvestmentStatistic> GetInvestmentsByCurrency(List<PortfolioDataRow> portfolioData, IList<ITradingItem> tradingItems, List<MonetaryDataRow> monetaryData)
         {
             var stockTrades = tradingItems.OfType<Trade>()
                                     .Where(t => t.IsShareTrade);
@@ -39,13 +39,15 @@ namespace StockViewer.Statistics
                .GroupBy(f => f.Currency, (c, fs) => (c, fs.Sum(ff => ff.Item2)))
                .ToDictionary(k => k.c, v => v.Item2);
 
+            var moneyByCurrency = monetaryData.ToDictionary(k=> k.Currency);
+
             var currencyBalanceSheets = stockTrades
                 .GroupBy(
                     t => (t.Symbol, t.Currency),
                     (cs, ts) => ComputeSymbolBalance(
-                        cs, 
-                        ts, 
-                        symbolPrices.GetValueOrDefault(cs.Symbol) 
+                        cs,
+                        ts,
+                        symbolPrices.GetValueOrDefault(cs.Symbol)
                             ?? new PortfolioSymbolStatistic
                             {
                                 Name = cs.Symbol,
@@ -58,6 +60,7 @@ namespace StockViewer.Statistics
                     Currency = c,
                     Symbols = symbols.OrderByDescending(s => s.InvestedNow).ToList(),
                     Fees = feesPerCurrency[c],
+                    Cash = moneyByCurrency.GetValueOrDefault(c)?.BuyingPower ?? (decimal)0.0
                 })
                 .ToList();
             return currencyBalanceSheets;

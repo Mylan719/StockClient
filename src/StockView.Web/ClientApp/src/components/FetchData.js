@@ -61,7 +61,7 @@ export class FetchData extends Component {
                 color: s.riskColor
             };
         });
-        
+
 
         const graphInvestedData = investmentStatistic.symbols.map(s => {
             return {
@@ -116,12 +116,19 @@ export class FetchData extends Component {
                             </tr>);
                         })}
                         <tr>
-                            <td>Total:</td>
-                            <td>{total.allTimeInvested}</td>
-                            <td>{total.allTimeInvestmentValue}</td>
-                            <td />
-                            <td>{Numeral(total.gain).format("0,0.00")}</td>
-                            <td>{Numeral(total.gainPercentage).format("0,0.00")}%</td>
+                            <th>Total:</th>
+                            <th>{Numeral(total.allTimeInvested).format("0,0.00")}</th>
+                            <th>{Numeral(total.allTimeInvestmentValue).format("0,0.00")}</th>
+                            <th />
+                            <th />
+                            <th className={total.gain < 0 ? 'fin-bad' : 'fin-good'}>{Numeral(total.gain).format("0,0.00")}</th>
+                            <th className={total.gainPercentage < 0 ? 'fin-bad' : 'fin-good'}>{Numeral(total.gainPercentage).format("0,0.00")}%</th>
+                        </tr>
+                        <tr>
+                            <th>Cash: </th>
+                            <th/>
+                            <th>{Numeral(investmentStatistic.cash).format("0,0.00")}</th>
+                            <th colSpan={3} />
                         </tr>
                     </tbody>
                 </table>

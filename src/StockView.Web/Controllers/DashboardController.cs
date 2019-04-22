@@ -44,7 +44,11 @@ namespace StockView.Api.Controllers
                     await Task.Delay(100);
                     var tradingItems = await tradingItemProvider.GetAllItemsAsync();
 
-                    var currencyBalanceSheets = tradingStatisticsProvider.GetInvestmentsByCurrency(portfolioData, tradingItems)
+                    //not to get banned
+                    await Task.Delay(100);
+                    var monetaryData = await fioClient.GetMonetaryDataAsync();
+
+                    var currencyBalanceSheets = tradingStatisticsProvider.GetInvestmentsByCurrency(portfolioData, tradingItems, monetaryData)
                         .Select(s => new PortfolioDashBoardDto
                         {
                             Statistic = s,
