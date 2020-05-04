@@ -161,6 +161,7 @@ namespace StockViewer.Statistics
                 { "GOOGL", Risk.Low},
                 { "TSLA", Risk.Moderate },
                 { "MSFT", Risk.Low },
+                { "CAT", Risk.Low },
                 { "IRDM", Risk.High },
                 { "FUV", Risk.High },
                 { "DBX", Risk.Moderate },

@@ -18,7 +18,10 @@ namespace StockViewer.Fio.Trading
 
         public async Task<IList<ITradingItem>> GetAllItemsAsync()
         {
-            var tradeData = await fioClient.GetTradeDataAsync();
+            //The table pages only one year back
+            var tradeData = new List<TradeDataRow>();
+            tradeData.AddRange( await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-1).AddDays(1), DateTime.Now));
+            tradeData.AddRange( await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-2).AddDays(1), DateTime.Now.AddYears(-1)));
 
             return ProcessTradeData(tradeData);
         }
@@ -37,7 +40,7 @@ namespace StockViewer.Fio.Trading
                 });
 
             var trades = tradeData
-                .Where(td => td.Price.HasValue && td.Amount.HasValue && !string.IsNullOrWhiteSpace(td.Type))
+                .Where(td => td.Price.HasValue && td.Amount.HasValue && !string.IsNullOrWhiteSpace(td.Type) && !string.IsNullOrWhiteSpace(td.Currency))
                 .Select(td => new Trade
                 {
                     Date = td.Date,
@@ -72,11 +75,26 @@ namespace StockViewer.Fio.Trading
                       Type = GetTransactionTypeAndAccount(td).Item1
                   });
 
+            var cancellations = tradeData
+                 .Where(td => td.Price.HasValue && td.Amount.HasValue && !string.IsNullOrWhiteSpace(td.Type) && string.IsNullOrWhiteSpace(td.Currency))
+                 .Select(td => new Trade
+                 {
+                     Date = td.Date,
+                     Fee = 0,
+                     Amount = td.Amount.Value,
+                     Currency = "CZK",
+                     UnitPrice = 0,
+                     Paied = 0,
+                     Symbol = td.Symbol,
+                     Type = GetTradeType(td)
+                 });
+
             return trades
                 .OfType<ITradingItem>()
                 .Concat(transfers)
                 .Concat(fees)
                 .Concat(dividends)
+                .Concat(cancellations)
                 .ToList();
         }
 

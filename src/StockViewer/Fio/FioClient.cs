@@ -25,9 +25,11 @@ namespace StockViewer.Fio
             var response = await httpClient.PostAsync("https://www.fio.sk/e-broker/", requestPayload);
         }
 
-        public async Task<List<TradeDataRow>> GetTradeDataAsync()
+        public async Task<List<TradeDataRow>> GetTradeDataAsync(DateTime from, DateTime to)
         {
-            var response = await httpClient.GetAsync("https://www.fio.sk/e-broker/e-obchody.cgi");
+            var fromString = from.ToString("dd.MM.yyyy");
+            var toString = to.ToString("dd.MM.yyyy");
+            var response = await httpClient.GetAsync($"https://www.fio.sk/e-broker/e-obchody.cgi?obchody_DAT_od={fromString}&obchody_DAT_do={toString}");
             var document = await GetHtmlDocumentAsync(response);
 
             var tradesTable = document.DocumentNode.QuerySelector("table#obchody_full_table")
