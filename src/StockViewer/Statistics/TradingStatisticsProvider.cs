@@ -70,8 +70,10 @@ namespace StockViewer.Statistics
         {
             return new TotalInvestmentStatistic
             {
-                AllTimeInvestmentValue = statistic.Symbols.Sum(sb => sb.InvestedNowPrice) + statistic.Symbols.Sum(s => s.RealizedGains),
-                AllTimeInvested = statistic.Symbols.Sum(sb => sb.InvestedNow) + statistic.Fees
+                InvestedNowPrice = statistic.Symbols.Sum(sb => sb.InvestedNowPrice),
+                InvestedNow = statistic.Symbols.Sum(sb => sb.InvestedNow),
+                InvestedAllTime = statistic.Symbols.Sum(sb => sb.InvestedAllTime) + statistic.Fees,
+                RealizedGains = statistic.Symbols.Sum(sb => sb.RealizedGains)
             };
         }
 

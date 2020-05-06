@@ -117,10 +117,10 @@ export class FetchData extends Component {
                         })}
                         <tr>
                             <th>Total:</th>
-                            <th>{Numeral(total.allTimeInvested).format("0,0.00")}</th>
-                            <th>{Numeral(total.allTimeInvestmentValue).format("0,0.00")}</th>
+                            <th>{Numeral(total.investedNow).format("0,0.00")}</th>
+                            <th>{Numeral(total.investedNowPrice).format("0,0.00")}</th>
                             <th />
-                            <th />
+                            <th>{Numeral(total.realizedGains).format("0,0.00")}</th>
                             <th className={total.gain < 0 ? 'fin-bad' : 'fin-good'}>{Numeral(total.gain).format("0,0.00")}</th>
                             <th className={total.gainPercentage < 0 ? 'fin-bad' : 'fin-good'}>{Numeral(total.gainPercentage).format("0,0.00")}%</th>
                         </tr>
