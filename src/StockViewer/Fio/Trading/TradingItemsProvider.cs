@@ -22,6 +22,7 @@ namespace StockViewer.Fio.Trading
             var tradeData = new List<TradeDataRow>();
             tradeData.AddRange( await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-1).AddDays(1), DateTime.Now));
             tradeData.AddRange( await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-2).AddDays(1), DateTime.Now.AddYears(-1)));
+            tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-3).AddDays(1), DateTime.Now.AddYears(-2)));
 
             return ProcessTradeData(tradeData);
         }
@@ -51,6 +52,24 @@ namespace StockViewer.Fio.Trading
                     Paied = td.GetTradedValues().Item2,
                     Symbol = td.Symbol,
                     Type = GetTradeType(td)
+                }).ToList();
+
+            var currencyByStock = trades
+                .GroupBy(k => k.Symbol, v => v.Currency)
+                .ToDictionary(k => k.Key, v => v.FirstOrDefault());
+
+            var stockSplitsAndCancellations = tradeData
+                .Where(td => td.Price == 0.0m && td.Amount.HasValue && !string.IsNullOrWhiteSpace(td.Type) && string.IsNullOrWhiteSpace(td.Currency) && !string.IsNullOrWhiteSpace(td.Symbol))
+                .Select(td => new Trade
+                {
+                    Date = td.Date,
+                    Fee = 0,
+                    Amount = td.Amount.Value,
+                    Currency = currencyByStock[td.Symbol],
+                    UnitPrice = td.Price.Value,
+                    Paied = 0,
+                    Symbol = td.Symbol,
+                    Type = GetTradeType(td)
                 });
 
             //beter validating data
@@ -75,26 +94,12 @@ namespace StockViewer.Fio.Trading
                       Type = GetTransactionTypeAndAccount(td).Item1
                   });
 
-            var cancellations = tradeData
-                 .Where(td => td.Price.HasValue && td.Amount.HasValue && !string.IsNullOrWhiteSpace(td.Type) && string.IsNullOrWhiteSpace(td.Currency))
-                 .Select(td => new Trade
-                 {
-                     Date = td.Date,
-                     Fee = 0,
-                     Amount = td.Amount.Value,
-                     Currency = "CZK",
-                     UnitPrice = 0,
-                     Paied = 0,
-                     Symbol = td.Symbol,
-                     Type = GetTradeType(td)
-                 });
-
             return trades
                 .OfType<ITradingItem>()
                 .Concat(transfers)
                 .Concat(fees)
                 .Concat(dividends)
-                .Concat(cancellations)
+                .Concat(stockSplitsAndCancellations)
                 .ToList();
         }
 

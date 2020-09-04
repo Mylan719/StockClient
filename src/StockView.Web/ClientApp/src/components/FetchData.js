@@ -13,6 +13,7 @@ import {
     RadialChart,
     FlexibleWidthXYPlot
 } from 'react-vis';
+import { Credentials } from './config.js'
 
 
 export class FetchData extends Component {
@@ -24,8 +25,8 @@ export class FetchData extends Component {
 
         var formData = FetchData.toFormData(
             {
-                login: '',
-                password: ''
+                login: Credentials.login,
+                password: Credentials.password
             });
 
         fetch('api/dashboard/stats', {

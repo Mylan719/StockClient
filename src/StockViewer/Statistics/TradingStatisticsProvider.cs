@@ -104,44 +104,55 @@ namespace StockViewer.Statistics
             PortfolioSymbolStatistic portfolioSymbolStats,
             decimal dividendGains)
         {
-            var symbolsIn = symbolTrades.OrderBy(s => s.Date).Where(t => t.IsAcquire).ToList();
-            var symbolsOut = symbolTrades.OrderBy(s => s.Date).Where(t => t.IsDispose).ToList();
+            var alllTrades = symbolTrades.OrderByDescending(s => s.Date).ToList();
 
-            var buyStack = new Stack<Trade>(symbolsIn);
+            var tradeStack = new Stack<Trade>(alllTrades);
+            var currentBuyStack = new Stack<Trade>();
 
-            var netSellGains = (decimal)0;
-            foreach (var sell in symbolsOut)
+            var netSellGains = 0.0m;
+            while (tradeStack.Count != 0)
             {
-                var unsatisfiedAmount = sell.Amount;
+                var trade = tradeStack.Pop();
+
+                if (trade.IsAcquire)
+                {
+                    currentBuyStack.Push(trade);
+                    continue;
+                }
+
+                var unsatisfiedAmount = trade.Amount;
                 while (unsatisfiedAmount > 0)
                 {
-                    var nextBuy = buyStack.Pop();
+                    if(unsatisfiedAmount > 0 && currentBuyStack.Count == 0)
+                    {
+                        throw new InvalidOperationException("At one point there is not enough shares to satisfy a buy. This is a api error.");
+                    }
+
+                    var nextBuy = currentBuyStack.Pop();
                     var amountSatisfied =
                         unsatisfiedAmount >= nextBuy.Amount // is remaining sell amount fully satisfied by this buy?
                         ? nextBuy.Amount
                         : unsatisfiedAmount;
 
-                    netSellGains += amountSatisfied * (sell.UnitPrice-nextBuy.UnitPrice);
+                    netSellGains += amountSatisfied * (trade.UnitPrice-nextBuy.UnitPrice);
 
                     unsatisfiedAmount -= amountSatisfied;
 
                     if (nextBuy.Amount > amountSatisfied)
                     {
                         //we are not done yet with this buy, some shares are still unsold
-                        buyStack.Push(nextBuy.Copy(nextBuy.Amount - amountSatisfied));
+                        currentBuyStack.Push(nextBuy.Copy(nextBuy.Amount - amountSatisfied));
                     }
                 }
             }
 
-            var netInvested = buyStack.Sum(b => b.UnitPrice * b.Amount);
-            var netAmount = buyStack.Sum(b => b.Amount);
+            var netInvested = currentBuyStack.Sum(b => b.UnitPrice * b.Amount);
+            var netAmount = currentBuyStack.Sum(b => b.Amount);
 
             if (netAmount != decimal.Zero && netAmount != portfolioSymbolStats.Amount)
             {
                 throw new InvalidOperationException("Net amount of shares computed from trades does not match amount in portfolio. This is a api error.");
             }
-
-
 
             return new SymbolInvestmentStatistic
             {
@@ -150,7 +161,7 @@ namespace StockViewer.Statistics
                 RealizedGains = netSellGains + dividendGains,
                 InvestedNow = netInvested,
                 InvestedNowPrice = netAmount * portfolioSymbolStats.Price,
-                InvestedAllTime = symbolsIn.Sum(s => s.UnitPrice * s.Amount),
+                InvestedAllTime = alllTrades.Where(t=> t.IsAcquire).Sum(s => s.UnitPrice * s.Amount),
                 BasePrice = netAmount != decimal.Zero
                     ? netInvested / netAmount
                     : decimal.Zero

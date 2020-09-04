@@ -2,7 +2,7 @@
 
 namespace StockViewer.Fio.Trading
 {
-    public class Trade : ITradingItem
+    public class Trade : IStocksTradingItem
     {
         public DateTime Date { get; set; }
         public string Currency { get; set; }

@@ -6,3 +6,4 @@
 /src/StockViewer/obj
 /src/StockViewer/bin/
 /src/StockViewer/Credentials.cs
+/src/StockView.Web/ClientApp/src/components/config.js
