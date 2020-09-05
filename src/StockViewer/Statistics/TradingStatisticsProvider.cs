@@ -79,7 +79,7 @@ namespace StockViewer.Statistics
 
         public InvestmentBalanceStatistic ComputeInvestmentBalance(CurrencyInvestmentStatistic statistic)
         {
-            var total = statistic.Symbols.Sum(s => s.InvestedNow);
+            var total = statistic.Symbols.Sum(s => s.InvestedNowPrice);
             var symbolRisks = GetRiskForSymbols();
             var riskColors = GetRiskColors();
 
@@ -88,7 +88,7 @@ namespace StockViewer.Statistics
                 Symbols = statistic.Symbols.Select(s => new SymbolBalance
                 {
                     Name = s.Name,
-                    Percentage = s.InvestedNow / total * 100,
+                    Percentage = s.InvestedNowPrice / total * 100,
                     Risk = symbolRisks[s.Name],
                     RiskColor = riskColors[symbolRisks[s.Name]]
                 })
