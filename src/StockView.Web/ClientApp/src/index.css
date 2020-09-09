@@ -12,3 +12,12 @@ td.fin-good, th.fin-good {
 td.fin-bad, th.fin-bad {
     color: orangered;
 }
+
+.graph-holder {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.graph-holder:nth-child(2n){
+    grid-column:2;
+}

@@ -10,19 +10,10 @@ using StockViewer.Statistics.Data;
 
 namespace StockView.Api.Controllers
 {
-    public class PortfolioDashBoardDto
-    {
-        public CurrencyInvestmentStatistic Statistic { get; set; }
-        public InvestmentBalanceStatistic Balance { get; set; }
-        public TotalInvestmentStatistic Total { get; set; }
-    }
-
     [Route("api/[controller]")]
     [ApiController]
     public class DashboardController : ControllerBase
     {
-        
-
         [HttpPost]
         [Route("stats")]
         public async Task<ActionResult<CurrencyInvestmentStatistic>> GetStatisticsForCurrencyAsync([FromForm]string login, [FromForm]string password)

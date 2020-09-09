@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StockViewer.BL.Valuation;
 
 namespace StockView.Web
 {
@@ -22,6 +23,7 @@ namespace StockView.Web
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddTransient<FundamentalsCalculator>();
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {

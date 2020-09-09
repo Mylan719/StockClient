@@ -1,0 +1,13 @@
+﻿{
+  "Years": [ "2019", "2018", "2017", "2016", "2015" ],
+  "Equity": [ "201442", "177628", "152502", "139036", "120331" ],
+  "Revenue": [ "161857", "136819", "110855", "90272", "74989" ],
+  "NetIncome": [ "34343", "30736", "12662", "19478", "15826" ],
+  "EPS": [ "49.16", "43.70", "18.00", "27.85", "22.84" ],
+  "SharesOutstanding": [ "745", "750", "751", "748", "745" ],
+  "PriceToSalesMin": "5.18",
+  "PriceToSalesMax": "7.72",
+  "PriceToEarningsMin": "21.86",
+  "PriceToEarningsMax": "58.65"
+}
+//$("div[role=row][id=row21jqxgrid] div[role=gridcell]").map(function (i,e) { return $(e).text();}).slice(2,7).toArray()
