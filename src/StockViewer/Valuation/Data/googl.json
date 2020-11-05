@@ -11,3 +11,6 @@
   "PriceToEarningsMax": "58.65"
 }
 //$("div[role=row][id=row21jqxgrid] div[role=gridcell]").map(function (i,e) { return $(e).text();}).slice(2,7).toArray()
+
+//var ps = $("div[id=style-1] table tr td:nth-child(4)").map(function(e) { return $(this).text();}).toArray();
+//Math.max(...ps);

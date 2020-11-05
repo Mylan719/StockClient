@@ -58,7 +58,7 @@ namespace StockViewer.Statistics
                 .GroupBy(sb => sb.Currency, (c, symbols) => new CurrencyInvestmentStatistic
                 {
                     Currency = c,
-                    Symbols = symbols.OrderByDescending(s => s.InvestedNow).ToList(),
+                    Symbols = symbols.OrderByDescending(s => s.InvestedNowPrice ).ToList(),
                     Fees = feesPerCurrency[c],
                     Cash = moneyByCurrency.GetValueOrDefault(c)?.BuyingPower ?? (decimal)0.0
                 })

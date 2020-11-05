@@ -1,0 +1,14 @@
+﻿{
+  "Years": [ "2019", "2018", "2017", "2016", "2015" ],
+  "Equity": [ "118304", "102330", "82718", "87711", "71997" ],
+  "Revenue": [ "143015", "125843", "110360", "96571", "91154" ],
+  "NetIncome": [ "44281", "39240", "16571", "25489", "20539" ],
+  "EPS": [ "5.76", "5.06", "2.13", "3.25", "2.56" ],
+  "SharesOutstanding": [ "7753", "7794", "7832", "8013", "8254" ],
+  "PriceToSalesMin": "3.21",
+  "PriceToSalesMax": "10.92",
+  "PriceToEarningsMin": "15.19",
+  "PriceToEarningsMax": "56.49"
+}
+//$("div[role=row][id=row21jqxgrid] div[role=gridcell]").map(function (i,e) { return $(e).text().replace('$','').replace(',','');}).slice(2,7).toArray() //ESP
+//var ps = $("table.historical_data_table tr td:nth-child(2)").map(function(e) { return $(this).text();}).toArray().slice(1,6); //shares

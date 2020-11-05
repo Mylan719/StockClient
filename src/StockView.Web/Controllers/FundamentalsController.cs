@@ -47,7 +47,7 @@ namespace StockView.Api.Controllers
         [Route("{symbol}/valuation-ps")]
         public BasicRevenueValuationModel FuturePriceSP(string symbol)
         {
-            return fundamentalsCalculator.ValuationFromSP(symbol);
+            return fundamentalsCalculator.ValuationFromSPConservative(symbol);
         }
     }
 }

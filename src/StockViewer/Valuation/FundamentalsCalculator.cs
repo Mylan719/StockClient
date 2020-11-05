@@ -39,7 +39,8 @@ namespace StockViewer.BL.Valuation
             try
             {
                 return GetData(symbol);
-            }catch(IOException)
+            }
+            catch (IOException)
             {
                 return null;
             }
@@ -57,6 +58,27 @@ namespace StockViewer.BL.Valuation
             };
         }
 
+        public BasicRevenueValuationModel ValuationFromSPConservative(string symbol)
+        {
+            var model = GetData(symbol);
+            var growthModel = CalculateEquityGrowth(symbol);
+
+            var minGrowth = growthModel.Growth.Where(g=> g>0).Min();
+
+            var averagePS = (model.PriceToSalesMax + model.PriceToSalesMin) / 2;
+            var revenuePerShare = model.RevenuePerShare(0);
+
+            var futurePrice = Math.Floor((double)revenuePerShare * Math.Pow(1.0 + (double)minGrowth, 5) * (double)averagePS);
+
+            return new BasicRevenueValuationModel
+            {
+                AveragePS = averagePS,
+                RevenuePerShare = revenuePerShare,
+                Growth = minGrowth,
+                FuturePrice = futurePrice
+            };
+        }
+
         public BasicRevenueValuationModel ValuationFromSP(string symbol)
         {
             var model = GetData(symbol);
@@ -65,9 +87,10 @@ namespace StockViewer.BL.Valuation
             var growth5years = GrowthRate(model.Revenue[4], model.Revenue[0], 4);
             var revenuePerShare = model.RevenuePerShare(0);
 
-            var futurePrice = Math.Floor( (double) revenuePerShare * Math.Pow(1.0 + (double)growth5years, 5) * (double)averagePS);
+            var futurePrice = Math.Floor((double)revenuePerShare * Math.Pow(1.0 + (double)growth5years, 5) * (double)averagePS);
 
-            return new BasicRevenueValuationModel{
+            return new BasicRevenueValuationModel
+            {
                 AveragePS = averagePS,
                 RevenuePerShare = revenuePerShare,
                 Growth = growth5years,
@@ -88,7 +111,8 @@ namespace StockViewer.BL.Valuation
 
             var futurePrice = Math.Floor((double)model.EPS[0] * Math.Pow(1.0 + (double)growth5years, 5) * (double)adjustedPE);
 
-            return new BasicValuationModel { 
+            return new BasicValuationModel
+            {
                 AveragePE = averagePE,
                 AdjustedPE = adjustedPE,
                 Growth = growth5years,
@@ -98,7 +122,7 @@ namespace StockViewer.BL.Valuation
         }
 
         private decimal GrowthRate(decimal presentValue, decimal futureValue, int years) =>
-            (decimal)Math.Pow((double)(futureValue / presentValue), (1 / (double)years))-1;
+            (decimal)Math.Pow((double)(futureValue / presentValue), (1 / (double)years)) - 1;
 
         private FundamentalsModel GetData(string symbol)
         {
