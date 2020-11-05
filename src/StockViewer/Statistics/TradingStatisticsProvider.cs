@@ -19,7 +19,7 @@ namespace StockViewer.Statistics
             var stockDividendGains = tradingItems
                 .OfType<Dividend>()
                 .GroupBy(t => t.Symbol, (symbol, symbolDivs) => (symbol, symbolDivs.Sum(sd => sd.Paied)))
-                .ToDictionary(k=> k.symbol, v=> v.Item2);
+                .ToDictionary(k => k.symbol, v => v.Item2);
 
             var symbolPrices = portfolioData
                 .ToDictionary(
@@ -39,7 +39,7 @@ namespace StockViewer.Statistics
                .GroupBy(f => f.Currency, (c, fs) => (c, fs.Sum(ff => ff.Item2)))
                .ToDictionary(k => k.c, v => v.Item2);
 
-            var moneyByCurrency = monetaryData.ToDictionary(k=> k.Currency);
+            var moneyByCurrency = monetaryData.ToDictionary(k => k.Currency);
 
             var currencyBalanceSheets = stockTrades
                 .GroupBy(
@@ -58,7 +58,7 @@ namespace StockViewer.Statistics
                 .GroupBy(sb => sb.Currency, (c, symbols) => new CurrencyInvestmentStatistic
                 {
                     Currency = c,
-                    Symbols = symbols.OrderByDescending(s => s.InvestedNowPrice ).ToList(),
+                    Symbols = symbols.OrderByDescending(s => s.InvestedNowPrice).ToList(),
                     Fees = feesPerCurrency[c],
                     Cash = moneyByCurrency.GetValueOrDefault(c)?.BuyingPower ?? (decimal)0.0
                 })
@@ -85,14 +85,19 @@ namespace StockViewer.Statistics
 
             return new InvestmentBalanceStatistic
             {
-                Symbols = statistic.Symbols.Select(s => new SymbolBalance
+                Symbols = statistic.Symbols.Select(s =>
                 {
-                    Name = s.Name,
-                    Percentage = s.InvestedNowPrice / total * 100,
-                    Risk = symbolRisks[s.Name],
-                    RiskColor = riskColors[symbolRisks[s.Name]]
+                    var risk = symbolRisks.ContainsKey(s.Name) ? symbolRisks[s.Name] : Risk.Low;
+
+                    return new SymbolBalance
+                    {
+                        Name = s.Name,
+                        Percentage = s.InvestedNowPrice / total * 100,
+                        Risk = risk,
+                        RiskColor = riskColors[risk]
+                    };
                 })
-                .OrderBy(s=> s.Risk)
+                .OrderBy(s => s.Risk)
                 .ToList(),
                 TotalInvestment = total
             };
@@ -123,7 +128,7 @@ namespace StockViewer.Statistics
                 var unsatisfiedAmount = trade.Amount;
                 while (unsatisfiedAmount > 0)
                 {
-                    if(unsatisfiedAmount > 0 && currentBuyStack.Count == 0)
+                    if (unsatisfiedAmount > 0 && currentBuyStack.Count == 0)
                     {
                         throw new InvalidOperationException("At one point there is not enough shares to satisfy a buy. This is a api error.");
                     }
@@ -134,7 +139,7 @@ namespace StockViewer.Statistics
                         ? nextBuy.Amount
                         : unsatisfiedAmount;
 
-                    netSellGains += amountSatisfied * (trade.UnitPrice-nextBuy.UnitPrice);
+                    netSellGains += amountSatisfied * (trade.UnitPrice - nextBuy.UnitPrice);
 
                     unsatisfiedAmount -= amountSatisfied;
 
@@ -161,7 +166,7 @@ namespace StockViewer.Statistics
                 RealizedGains = netSellGains + dividendGains,
                 InvestedNow = netInvested,
                 InvestedNowPrice = netAmount * portfolioSymbolStats.Price,
-                InvestedAllTime = alllTrades.Where(t=> t.IsAcquire).Sum(s => s.UnitPrice * s.Amount),
+                InvestedAllTime = alllTrades.Where(t => t.IsAcquire).Sum(s => s.UnitPrice * s.Amount),
                 BasePrice = netAmount != decimal.Zero
                     ? netInvested / netAmount
                     : decimal.Zero
