@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Valuation\Data\bynd.json" />
     <None Remove="Valuation\Data\DBX.json" />
     <None Remove="Valuation\Data\googl.json" />
     <None Remove="Valuation\Data\msft.json" />
@@ -14,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Valuation\Data\bynd.json" />
     <EmbeddedResource Include="Valuation\Data\msft.json" />
     <EmbeddedResource Include="Valuation\Data\googl.json" />
     <EmbeddedResource Include="Valuation\Data\tsla.json" />

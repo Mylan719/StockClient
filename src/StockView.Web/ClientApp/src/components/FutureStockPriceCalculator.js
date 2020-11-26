@@ -16,7 +16,8 @@ export class FutureStockPriceCalculator extends Component {
             symbol: "",
             newStockCount: 0,
             newStockPrice: 0,
-            newBasePrice: 0
+            newBasePrice: 0,
+            tradeAmount: 0
         };
     }
 
@@ -83,6 +84,7 @@ export class FutureStockPriceCalculator extends Component {
             shareCount: shareCount,
             newStockPrice: currentPrice,
             newBasePrice: totalPriceAfter / totalStocksAfter,
+            tradeAmount: currentPrice * newStockCountVal
         });
     }
 
@@ -96,6 +98,8 @@ export class FutureStockPriceCalculator extends Component {
                     <li>I own: {Numeral(this.state.shareCount).format("0,0.00")}</li>
                     <li>Current price: <input type="text" value={this.state.newStockPrice} onChange={this.newStockPriceChange} /></li>
                     <li>New base price: {Numeral(this.state.newBasePrice).format("0,0.00")}</li>
+                    <li>Trade total price: {Numeral(this.state.tradeAmount).format("0,0.00")}</li>
+
                 </ul>
             </div>);
     }

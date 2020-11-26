@@ -84,7 +84,7 @@ namespace StockViewer.BL.Valuation
             var model = GetData(symbol);
 
             var averagePS = (model.PriceToSalesMax + model.PriceToSalesMin) / 2;
-            var growth5years = GrowthRate(model.Revenue[4], model.Revenue[0], 4);
+            var growth5years = GrowthRate(model.Revenue.Last(), model.Revenue.First(), model.Revenue.Count-1);
             var revenuePerShare = model.RevenuePerShare(0);
 
             var futurePrice = Math.Floor((double)revenuePerShare * Math.Pow(1.0 + (double)growth5years, 5) * (double)averagePS);
@@ -102,8 +102,11 @@ namespace StockViewer.BL.Valuation
         {
             var model = GetData(symbol);
 
+            var lastAvailableEquity = model.Equity.Last();
+            var firstAvailableEquity = model.Equity.First();
+
             var averagePE = (model.PriceToEarningsMax + model.PriceToEarningsMin) / 2;
-            var growth5years = GrowthRate(model.Equity[4], model.Equity[0], 4);
+            var growth5years = GrowthRate(lastAvailableEquity, firstAvailableEquity, model.Equity.Count-1);
 
             var growthBasedPE = Math.Ceiling(growth5years * 100) * 2;
 
@@ -126,7 +129,7 @@ namespace StockViewer.BL.Valuation
 
         private FundamentalsModel GetData(string symbol)
         {
-            using (Stream stream = GetType().Assembly.GetManifestResourceStream($"StockViewer.BL.Valuation.Data.{symbol}.json"))
+            using (Stream stream = GetType().Assembly.GetManifestResourceStream($"StockViewer.BL.Valuation.Data.{symbol.ToLower()}.json"))
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
