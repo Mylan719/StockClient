@@ -155,7 +155,7 @@ namespace StockViewer.Fio.Trading
             var split = td.Description.Split(' ').ToList();
             var keyword = split.First();
 
-            if (keyword == "Převod" && split.Count == 4)
+            if (keyword == "Převod" && (split.Count == 4 || split.Count == 5))
             {
                 return (TransferType.Out, split.Last());
             }

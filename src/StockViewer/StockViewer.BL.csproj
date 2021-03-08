@@ -12,12 +12,14 @@
     <None Remove="Valuation\Data\googl.json" />
     <None Remove="Valuation\Data\msft.json" />
     <None Remove="Valuation\Data\tsla.json" />
+    <None Remove="Valuation\Data\ttcf.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Valuation\Data\bynd.json" />
     <EmbeddedResource Include="Valuation\Data\msft.json" />
     <EmbeddedResource Include="Valuation\Data\googl.json" />
+    <EmbeddedResource Include="Valuation\Data\ttcf.json" />
     <EmbeddedResource Include="Valuation\Data\tsla.json" />
     <EmbeddedResource Include="Valuation\Data\dbx.json" />
   </ItemGroup>

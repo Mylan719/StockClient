@@ -1,0 +1,13 @@
+﻿{
+  "Years": [ "2020","2019", "2018" ],
+  "Equity": [ "207.913", "206.606", "203.57" ], //milions
+  "Revenue": [ "148.89", "84.92", "47.3" ], //milions
+  "NetIncome": [ "1.3","4.53", "-0.121" ], //milions
+  "EPS": [ "0,0159", "0.677", "-0.018" ],
+  "SharesOutstanding": [ "81.45", "6.687798", "6.055660" ], //milions
+  //"MedianSharePrice": [ "10.34", "10.06", "9.63"]
+  "PriceToSalesMin": "0.76",
+  "PriceToSalesMax": "15.317",
+  "PriceToEarningsMin": "14.25",
+  "PriceToEarningsMax": "1759.72"
+}

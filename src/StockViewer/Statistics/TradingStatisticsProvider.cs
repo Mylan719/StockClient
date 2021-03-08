@@ -92,7 +92,9 @@ namespace StockViewer.Statistics
                     return new SymbolBalance
                     {
                         Name = s.Name,
-                        Percentage = s.InvestedNowPrice / total * 100,
+                        Percentage = total == 0 
+                            ? 0 
+                            : s.InvestedNowPrice / total * 100,
                         Risk = risk,
                         RiskColor = riskColors[risk]
                     };
