@@ -3,6 +3,7 @@
     public enum DividentTransactionType
     {
         Payment,
-        Tax
+        Tax,
+        Fee
     }
 }

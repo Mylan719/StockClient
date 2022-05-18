@@ -20,9 +20,10 @@ namespace StockViewer.Fio.Trading
         {
             //The table pages only one year back
             var tradeData = new List<TradeDataRow>();
-            tradeData.AddRange( await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-1).AddDays(1), DateTime.Now));
-            tradeData.AddRange( await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-2).AddDays(1), DateTime.Now.AddYears(-1)));
+            tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-1).AddDays(1), DateTime.Now));
+            tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-2).AddDays(1), DateTime.Now.AddYears(-1)));
             tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-3).AddDays(1), DateTime.Now.AddYears(-2)));
+            tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-4).AddDays(1), DateTime.Now.AddYears(-3)));
 
             return ProcessTradeData(tradeData);
         }
@@ -32,7 +33,8 @@ namespace StockViewer.Fio.Trading
         {
             var dividends = tradeData
                 .Where(td => td.Price.HasValue && td.Amount.HasValue && string.IsNullOrWhiteSpace(td.Type))
-                .Select(td => new Dividend {
+                .Select(td => new Dividend
+                {
                     Date = td.Date,
                     Currency = td.Currency,
                     Paied = td.Amount.Value,
@@ -116,6 +118,10 @@ namespace StockViewer.Fio.Trading
                 if (parts[2] == "Daň")
                 {
                     return DividentTransactionType.Tax;
+                }
+                if (parts.LastOrDefault() == "Fee")
+                {
+                    return DividentTransactionType.Fee;
                 }
                 if (parts[2] == "Dividenda")
                 {
