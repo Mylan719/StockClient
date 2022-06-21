@@ -6,7 +6,6 @@ using StockViewer.Statistics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace StockViewer
@@ -24,7 +23,7 @@ namespace StockViewer
         {
             using (var alphaClient = new AlphaVantageClient(Credentials.AlphaVergeToken))
             {
-                using (var fioClient = new FioClient())
+                using (var fioClient = new FioClient(null))
                 {
                     await fioClient.LoginAsync(Credentials.FioUserName, Credentials.FioUserPassword);
 

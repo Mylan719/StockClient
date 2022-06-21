@@ -11,14 +11,20 @@ using StockViewer.Statistics.Data;
 namespace StockView.Api.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class DashboardController : ControllerBase
+    public class DashboardController : Controller
     {
+        private readonly Func<FioClient> clientFactory;
+
+        public DashboardController(Func<FioClient> clientFactory)
+        {
+            this.clientFactory = clientFactory;
+        }
+
         [HttpPost]
         [Route("stats")]
         public async Task<ActionResult<CurrencyInvestmentStatistic>> GetStatisticsForCurrencyAsync([FromForm]string login, [FromForm]string password)
         {
-            using (var fioClient = new FioClient())
+            using (var fioClient = clientFactory())
             {
                 var tradingItemProvider = new TradingItemProvider(fioClient);
                 var tradingStatisticsProvider = new TradingStatisticsProvider();

@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StockViewer.BL;
 using StockViewer.BL.Valuation;
+using StockViewer.Fio;
+using System;
 
 namespace StockView.Web
 {
@@ -21,7 +22,7 @@ namespace StockView.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddControllersWithViews();
 
             services.AddTransient<FundamentalsCalculator>();
             // In production, the React files will be served from this directory
@@ -29,6 +30,9 @@ namespace StockView.Web
             {
                 configuration.RootPath = "ClientApp/build";
             });
+            services.AddSingleton<FioClient>();
+            services.AddSingleton<Func<FioClient>>(s => () => s.GetRequiredService<FioClient>());
+            services.Configure<FioOptions>(Configuration.GetSection("Fio"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,15 +48,17 @@ namespace StockView.Web
                 app.UseHsts();
             }
 
+            app.UseRouting();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseMvc(routes =>
+            app.UseEndpoints(builder =>
             {
-                routes.MapRoute(
+                builder.MapControllerRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    pattern: "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
