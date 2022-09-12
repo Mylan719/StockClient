@@ -24,6 +24,7 @@ namespace StockViewer.Fio.Trading
             tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-2).AddDays(1), DateTime.Now.AddYears(-1)));
             tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-3).AddDays(1), DateTime.Now.AddYears(-2)));
             tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-4).AddDays(1), DateTime.Now.AddYears(-3)));
+            tradeData.AddRange(await fioClient.GetTradeDataAsync(DateTime.Now.AddYears(-5).AddDays(1), DateTime.Now.AddYears(-4)));
 
             return ProcessTradeData(tradeData);
         }
@@ -31,8 +32,31 @@ namespace StockViewer.Fio.Trading
 
         private IList<ITradingItem> ProcessTradeData(List<TradeDataRow> tradeData)
         {
+            var spinOffs = tradeData
+                .Where(td => 
+                    td.Price.HasValue &&
+                    td.Amount.HasValue &&
+                    string.IsNullOrWhiteSpace(td.Type) &&
+                    !string.IsNullOrWhiteSpace(td.Description) &&
+                    td.Description.Contains("Spin-off"))
+                .Select(td => new Trade
+                {
+                    Date = td.Date,
+                    Fee = 0,
+                    Amount = td.Amount.Value,
+                    Currency = "USD",
+                    UnitPrice = 0,
+                    Paied = 0,
+                    Symbol = td.Currency,
+                    Type = TradeType.Buy
+                }).ToList();
+
             var dividends = tradeData
-                .Where(td => td.Price.HasValue && td.Amount.HasValue && string.IsNullOrWhiteSpace(td.Type))
+                .Where(td =>
+                          td.Price.HasValue &&
+                          td.Amount.HasValue &&
+                          string.IsNullOrWhiteSpace(td.Type) &&
+                          (string.IsNullOrWhiteSpace(td.Description) || !td.Description.Contains("Spin-off")))
                 .Select(td => new Dividend
                 {
                     Date = td.Date,
@@ -102,6 +126,7 @@ namespace StockViewer.Fio.Trading
                 .Concat(fees)
                 .Concat(dividends)
                 .Concat(stockSplitsAndCancellations)
+                .Concat(spinOffs)
                 .ToList();
         }
 
